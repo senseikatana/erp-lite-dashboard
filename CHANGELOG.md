@@ -7,12 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased]
-
-Nothing yet.
-
----
-
 ## [0.2.0]
 
 Complete rewrite of the application: the Streamlit prototype is gone, replaced
@@ -138,6 +132,121 @@ by a FastAPI API and a Nuxt 3 front end.
   administrator access is rejected.
 
 ---
+
+## [0.1.1] - 2026-10-14
+
+Highlights: fix: update .gitignore and CHANGELOG.md files.
+
+- [x] 🐛 fix: update .gitignore and CHANGELOG.md files
+  - `.gitignore`
+  - `Makefile`
+  - `README.md`
+  - `backend/.env.example`
+  - `backend/Dockerfile`
+  - `backend/README.md`
+  - `backend/app/__init__.py`
+  - `backend/app/api/__init__.py`
+  - `backend/app/api/deps.py`
+  - `backend/app/api/v1/__init__.py`
+  - `backend/app/api/v1/endpoints/__init__.py`
+  - `backend/app/api/v1/endpoints/auth.py`
+  - `backend/app/api/v1/endpoints/companies.py`
+  - `backend/app/api/v1/endpoints/dashboard.py`
+  - `backend/app/api/v1/endpoints/partners.py`
+  - `backend/app/api/v1/endpoints/planning.py`
+  - `backend/app/api/v1/endpoints/purchases.py`
+  - `backend/app/api/v1/endpoints/sales.py`
+  - `backend/app/api/v1/endpoints/warehouse.py`
+  - `backend/app/api/v1/router.py`
+  - `backend/app/core/__init__.py`
+  - `backend/app/core/config.py`
+  - `backend/app/core/database.py`
+  - `backend/app/core/security.py`
+  - `backend/app/main.py`
+  - `backend/app/models/__init__.py`
+  - `backend/app/models/activity.py`
+  - `backend/app/models/base.py`
+  - `backend/app/models/company.py`
+  - `backend/app/models/demand.py`
+  - `backend/app/models/item.py`
+  - `backend/app/models/partner.py`
+  - `backend/app/models/purchasing.py`
+  - `backend/app/models/routing.py`
+  - `backend/app/models/sales.py`
+  - `backend/app/models/user.py`
+  - `backend/app/schemas/__init__.py`
+  - `backend/app/schemas/auth.py`
+  - `backend/app/schemas/common.py`
+  - `backend/app/schemas/company.py`
+  - `backend/app/schemas/dashboard.py`
+  - `backend/app/schemas/item.py`
+  - `backend/app/schemas/ops.py`
+  - `backend/app/schemas/partner.py`
+  - `backend/app/schemas/purchasing.py`
+  - `backend/app/schemas/sales.py`
+  - `backend/app/seed.py`
+  - `backend/app/services/__init__.py`
+  - `backend/app/services/activity.py`
+  - `backend/app/services/demand_service.py`
+  - `backend/app/services/kpi_service.py`
+  - `backend/app/services/purchasing_service.py`
+  - `backend/app/services/sales_service.py`
+  - `backend/pyproject.toml`
+  - `backend/tests/__init__.py`
+  - `backend/tests/conftest.py`
+  - `backend/tests/test_auth.py`
+  - `backend/tests/test_endpoints_smoke.py`
+  - `backend/tests/test_kpi_service.py`
+  - `backend/tests/test_purchasing_workflow.py`
+  - `backend/tests/test_sales_workflow.py`
+  - `config.py`
+  - `database.py`
+  - `docker-compose.yml`
+  - `frontend/.env.example`
+  - `frontend/Dockerfile`
+  - `frontend/README.md`
+  - `frontend/app.vue`
+  - `frontend/assets/css/main.css`
+  - `frontend/components/CompanySwitcher.vue`
+  - `frontend/components/EmptyState.vue`
+  - `frontend/components/KpiCard.vue`
+  - `frontend/components/LanguageSwitcher.vue`
+  - `frontend/components/StatCard.vue`
+  - `frontend/components/StatusBadge.vue`
+  - `frontend/composables/useApi.ts`
+  - `frontend/composables/useFormat.ts`
+  - `frontend/error.vue`
+  - `frontend/i18n/locales/ca.json`
+  - `frontend/i18n/locales/en.json`
+  - `frontend/i18n/locales/es.json`
+  - `frontend/layouts/auth.vue`
+  - `frontend/layouts/default.vue`
+  - `frontend/middleware/auth.global.ts`
+  - `frontend/nuxt.config.ts`
+  - `frontend/package-lock.json`
+  - `frontend/package.json`
+  - `frontend/pages/activity.vue`
+  - `frontend/pages/demand.vue`
+  - `frontend/pages/index.vue`
+  - `frontend/pages/login.vue`
+  - `frontend/pages/purchases.vue`
+  - `frontend/pages/routes.vue`
+  - `frontend/pages/sales.vue`
+  - `frontend/pages/warehouse.vue`
+  - `frontend/stores/auth.ts`
+  - `frontend/tsconfig.json`
+  - `frontend/types/api.ts`
+  - `i18n.py`
+  - `modules/dashboard.py`
+  - `modules/modules/modules/compras.py`
+  - `modules/modules/modules/modules/modules/demanda.py`
+  - `modules/modules/modules/modules/modules/modules/app.py`
+  - `modules/modules/modules/modules/modules/modules/routes.py`
+  - `modules/modules/modules/modules/warehouse.py`
+  - `modules/modules/ventas.py`
+  - `requeriments.txt`
+  - `seed_data.py`
+- [x] 📝 docs(modules): add CompanyConfig, Customer and DemandLine
 
 ## [0.1.0]
 
