@@ -1,0 +1,55 @@
+# Local development stack.
+#
+# SQLite is the default and needs nothing here. Use this profile when you want
+# to exercise the PostgreSQL path or run the full stack in containers:
+#
+#   docker compose up --build
+#
+services:
+  db:
+    image: postgres:16-alpine
+    profiles: [postgres]
+    environment:
+      POSTGRES_USER: erp
+      POSTGRES_PASSWORD: erp
+      POSTGRES_DB: erp_lite
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U erp -d erp_lite']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      ENVIRONMENT: development
+      DEBUG: 'true'
+      SECRET_KEY: ${SECRET_KEY:-dev-only-insecure-key-change-me-0123456789abcdef}
+      DATABASE_URL: ${DATABASE_URL:-}
+      CORS_ORIGINS: '["http://localhost:3000"]'
+    ports:
+      - '8000:8000'
+    volumes:
+      - ./backend:/app
+    command: >
+      sh -c "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      NUXT_PUBLIC_API_BASE: http://localhost:8000/api/v1
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev
+
+volumes:
+  pgdata:

@@ -1,0 +1,41 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- Database ---
+*.db
+*.sqlite
+*.sqlite3
+backend/data/
+
+# --- Node / Nuxt ---
+node_modules/
+frontend/.nuxt/
+frontend/.output/
+frontend/.data/
+frontend/dist/
+.nuxt/
+.output/
+
+# --- Environment ---
+# .env files hold secrets. Only the .example templates are tracked.
+.env
+.env.*
+!.env.example
+
+# --- Editors / OS ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# --- Logs ---
+*.log
+npm-debug.log*
