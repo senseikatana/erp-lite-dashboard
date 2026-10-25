@@ -45,6 +45,7 @@
     "user": "Usuario",
     "role": "Rol",
     "language": "Idioma",
+    "theme": "Tema",
     "currency": "Moneda",
     "date": "Fecha",
     "status": "Estado",

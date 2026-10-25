@@ -62,170 +62,124 @@ function nextAction(order: SalesOrder): { status: SalesOrderStatus; label: strin
 </script>
 
 <template>
-  <div class="stack">
-    <div class="card toolbar">
-      <div class="row">
-        <label for="status-filter" class="faint">{{ t('sales.filterStatus') }}</label>
-        <select
-          id="status-filter"
-          v-model="statusFilter"
-          multiple
-          size="1"
-          class="status-select"
-          @change="(e) => { const v = (e.target as HTMLSelectElement).value; statusFilter = v ? [v as SalesOrderStatus] : [] }"
-        >
-          <option value="">{{ t('app.all') }}</option>
-          <option v-for="option in statusOptions" :key="option" :value="option">
-            {{ t(`status.${option}`) }}
-          </option>
-        </select>
+  <div class="flex flex-col gap-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="flex flex-wrap items-center gap-3">
+          <label for="status-filter" class="text-sm text-ink/50">{{ t('sales.filterStatus') }}</label>
+          <select
+            id="status-filter"
+            v-model="statusFilter"
+            multiple
+            size="1"
+            class="select select-sm min-w-48"
+            @change="(e) => { const v = (e.target as HTMLSelectElement).value; statusFilter = v ? [v as SalesOrderStatus] : [] }"
+          >
+            <option value="">{{ t('app.all') }}</option>
+            <option v-for="option in statusOptions" :key="option" :value="option">
+              {{ t(`status.${option}`) }}
+            </option>
+          </select>
+        </div>
       </div>
-      <p v-if="notice" class="notice">{{ notice }}</p>
     </div>
 
-    <p v-if="pending" class="muted">{{ t('app.loading') }}</p>
+    <AppNotice v-if="notice" :message="notice" />
+
+    <p v-if="pending" class="text-sm text-ink/60">{{ t('app.loading') }}</p>
 
     <div v-else-if="!data?.items.length" class="card">
       <EmptyState :message="t('sales.noOrders')" />
     </div>
 
-    <div v-else class="stack">
-      <article v-for="order in data.items" :key="order.id" class="card order">
-        <div class="row-between order-head">
-          <div class="row">
-            <span class="mono order-number">{{ order.number }}</span>
-            <StatusBadge :value="order.status" />
+    <div v-else class="flex flex-col gap-4">
+      <article v-for="order in data.items" :key="order.id" class="card">
+        <div class="card-body">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="font-mono text-sm font-semibold">{{ order.number }}</span>
+              <StatusBadge :value="order.status" />
+            </div>
+            <span class="text-base font-semibold tabular-nums">{{ money(order.total, currency) }}</span>
           </div>
-          <span class="order-total numeric">{{ money(order.total, currency) }}</span>
-        </div>
 
-        <dl class="order-meta">
-          <div>
-            <dt class="faint">{{ t('common.customer') }}</dt>
-            <dd>{{ order.customer_name ?? `#${order.customer_id}` }}</dd>
+          <dl class="grid grid-cols-2 gap-3 border-y border-sunken py-3 md:grid-cols-4">
+            <div>
+              <dt class="text-xs uppercase tracking-wide text-ink/50">{{ t('common.customer') }}</dt>
+              <dd class="text-sm">{{ order.customer_name ?? `#${order.customer_id}` }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs uppercase tracking-wide text-ink/50">{{ t('common.orderDate') }}</dt>
+              <dd class="text-sm">{{ date(order.order_date) }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs uppercase tracking-wide text-ink/50">{{ t('common.deliveryDate') }}</dt>
+              <dd class="text-sm">{{ date(order.delivery_date) }}</dd>
+            </div>
+            <div>
+              <dt class="text-xs uppercase tracking-wide text-ink/50">{{ t('sales.lines') }}</dt>
+              <dd class="text-sm">{{ order.lines.length }}</dd>
+            </div>
+          </dl>
+
+          <div class="overflow-x-auto">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>{{ t('common.item') }}</th>
+                  <th class="text-right">{{ t('common.quantity') }}</th>
+                  <th class="text-right">{{ t('common.price') }}</th>
+                  <th class="text-right">{{ t('sales.picked') }}</th>
+                  <th class="text-right">{{ t('sales.shipped') }}</th>
+                  <th class="text-right">{{ t('common.total') }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="line in order.lines" :key="line.id" class="hover:bg-surface/60">
+                  <td>
+                    <span class="font-mono text-xs text-ink/50">{{ line.item_code }}</span>
+                    {{ line.item_description }}
+                  </td>
+                  <td class="text-right tabular-nums">{{ number(line.quantity) }}</td>
+                  <td class="text-right tabular-nums">{{ money(line.unit_price, currency) }}</td>
+                  <td class="text-right tabular-nums">{{ number(line.qty_picked) }}</td>
+                  <td class="text-right tabular-nums">{{ number(line.qty_shipped) }}</td>
+                  <td class="text-right tabular-nums">{{ money(line.line_total, currency) }}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <div>
-            <dt class="faint">{{ t('common.orderDate') }}</dt>
-            <dd>{{ date(order.order_date) }}</dd>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button
+              v-if="nextAction(order)"
+              class="btn btn-primary btn-sm"
+              type="button"
+              @click="advance(order, nextAction(order)!.status)"
+            >
+              {{ nextAction(order)!.label }}
+            </button>
+
+            <button
+              v-if="order.status === 'PICKING' && auth.hasRole('admin', 'logistics')"
+              class="btn btn-sm"
+              type="button"
+              @click="advance(order, 'OPEN')"
+            >
+              {{ t('sales.reopen') }}
+            </button>
+
+            <button
+              v-if="auth.hasRole('admin') && !['INVOICED', 'CANCELLED'].includes(order.status)"
+              class="btn btn-error btn-sm"
+              type="button"
+              @click="cancelOrder(order)"
+            >
+              {{ t('sales.cancel') }}
+            </button>
           </div>
-          <div>
-            <dt class="faint">{{ t('common.deliveryDate') }}</dt>
-            <dd>{{ date(order.delivery_date) }}</dd>
-          </div>
-          <div>
-            <dt class="faint">{{ t('sales.lines') }}</dt>
-            <dd>{{ order.lines.length }}</dd>
-          </div>
-        </dl>
-
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>{{ t('common.item') }}</th>
-                <th class="numeric">{{ t('common.quantity') }}</th>
-                <th class="numeric">{{ t('common.price') }}</th>
-                <th class="numeric">{{ t('sales.picked') }}</th>
-                <th class="numeric">{{ t('sales.shipped') }}</th>
-                <th class="numeric">{{ t('common.total') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="line in order.lines" :key="line.id">
-                <td>
-                  <span class="mono faint">{{ line.item_code }}</span>
-                  {{ line.item_description }}
-                </td>
-                <td class="numeric">{{ number(line.quantity) }}</td>
-                <td class="numeric">{{ money(line.unit_price, currency) }}</td>
-                <td class="numeric">{{ number(line.qty_picked) }}</td>
-                <td class="numeric">{{ number(line.qty_shipped) }}</td>
-                <td class="numeric">{{ money(line.line_total, currency) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="row order-actions">
-          <button
-            v-if="nextAction(order)"
-            class="btn btn-primary btn-sm"
-            type="button"
-            @click="advance(order, nextAction(order)!.status)"
-          >
-            {{ nextAction(order)!.label }}
-          </button>
-
-          <button
-            v-if="order.status === 'PICKING' && auth.hasRole('admin', 'logistics')"
-            class="btn btn-sm"
-            type="button"
-            @click="advance(order, 'OPEN')"
-          >
-            {{ t('sales.reopen') }}
-          </button>
-
-          <button
-            v-if="auth.hasRole('admin') && !['INVOICED', 'CANCELLED'].includes(order.status)"
-            class="btn btn-danger btn-sm"
-            type="button"
-            @click="cancelOrder(order)"
-          >
-            {{ t('sales.cancel') }}
-          </button>
         </div>
       </article>
     </div>
   </div>
 </template>
-
-<style scoped>
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.status-select { min-width: 12rem; }
-
-.notice {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: var(--accent-strong);
-}
-
-.order-head { margin-bottom: 0.75rem; }
-
-.order-number { font-weight: 600; font-size: 0.9375rem; }
-
-.order-total { font-weight: 600; font-size: 1rem; }
-
-.order-meta {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin: 0 0 0.85rem;
-  padding: 0.65rem 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-}
-
-.order-meta dt {
-  font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.order-meta dd {
-  margin: 0.1rem 0 0;
-  font-size: 0.8125rem;
-}
-
-.order-actions { margin-top: 0.85rem; }
-
-@media (max-width: 800px) {
-  .order-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-</style>

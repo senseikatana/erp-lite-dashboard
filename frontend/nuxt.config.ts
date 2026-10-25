@@ -1,4 +1,4 @@
-import { fileURLToPath } from 'node:url'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineNuxtConfig({
   compatibilityDate: '2025-01-01',
@@ -8,6 +8,10 @@ export default defineNuxtConfig({
   modules: ['@nuxtjs/i18n', '@pinia/nuxt'],
 
   css: ['~/assets/css/main.css'],
+
+  vite: {
+    plugins: [tailwindcss()],
+  },
 
   i18n: {
     strategy: 'no_prefix',

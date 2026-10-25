@@ -64,143 +64,143 @@ function updateSimulator(stock: number) {
 </script>
 
 <template>
-  <div class="stack">
-    <p v-if="notice" class="notice">{{ notice }}</p>
+  <div class="flex flex-col gap-4">
+    <AppNotice v-if="notice" :message="notice" />
 
     <div v-if="canManage" class="card">
-      <div class="card-header">
-        <h2>{{ t('demand.parameters') }}</h2>
-        <button class="btn btn-primary btn-sm" type="button" @click="regenerate">
-          {{ t('demand.regenerate') }}
-        </button>
-      </div>
-
-      <div class="grid grid-2">
-        <div class="field">
-          <label for="coverage-ratio">Coverage factor</label>
-          <input id="coverage-ratio" v-model.number="coverageRatio" type="number" step="0.1" min="0.1" />
-          <span class="hint">Multiple of the minimum stock level.</span>
+      <div class="card-body">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold">{{ t('demand.parameters') }}</h2>
+          <button class="btn btn-primary btn-sm" type="button" @click="regenerate">
+            {{ t('demand.regenerate') }}
+          </button>
         </div>
-        <div class="field">
-          <label for="horizon-days">Horizon (days)</label>
-          <input id="horizon-days" v-model.number="horizonDays" type="number" step="1" min="1" />
-          <span class="hint">Delivery commitments inside this window are counted.</span>
+
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div>
+            <label class="label-text" for="coverage-ratio">Coverage factor</label>
+            <input
+              id="coverage-ratio"
+              v-model.number="coverageRatio"
+              class="input w-full"
+              type="number"
+              step="0.1"
+              min="0.1"
+            />
+            <span class="helper-text">Multiple of the minimum stock level.</span>
+          </div>
+          <div>
+            <label class="label-text" for="horizon-days">Horizon (days)</label>
+            <input
+              id="horizon-days"
+              v-model.number="horizonDays"
+              class="input w-full"
+              type="number"
+              step="1"
+              min="1"
+            />
+            <span class="helper-text">Delivery commitments inside this window are counted.</span>
+          </div>
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <h2>{{ t('demand.title') }}</h2>
-        <span class="muted">{{ t('demand.subtitle') }}</span>
-      </div>
+      <div class="card-body">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold">{{ t('demand.title') }}</h2>
+          <span class="text-sm text-ink/60">{{ t('demand.subtitle') }}</span>
+        </div>
 
-      <p v-if="pending" class="muted">{{ t('app.loading') }}</p>
+        <p v-if="pending" class="text-sm text-ink/60">{{ t('app.loading') }}</p>
 
-      <EmptyState v-else-if="!data?.items.length" :message="t('demand.noLines')" />
+        <EmptyState v-else-if="!data?.items.length" :message="t('demand.noLines')" />
 
-      <div v-else class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>{{ t('common.item') }}</th>
-              <th class="numeric">{{ t('demand.needed') }}</th>
-              <th>{{ t('demand.requiredDate') }}</th>
-              <th>{{ t('demand.source') }}</th>
-              <th v-if="canManage"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="line in data.items" :key="line.id">
-              <td>
-                <span class="mono faint">{{ line.item_code }}</span>
-                {{ line.item_description }}
-              </td>
-              <td class="numeric">{{ number(line.quantity_needed) }}</td>
-              <td class="nowrap">{{ date(line.required_date) }}</td>
-              <td class="muted">{{ t(`demand.source${line.source === 'MIN_STOCK' ? 'MinStock' : line.source === 'SALES_ORDER' ? 'Sales' : 'Forecast'}`) }}</td>
-              <td v-if="canManage" class="text-right">
-                <button class="btn btn-sm" type="button" @click="setAction(line, 'ORDERED')">
-                  {{ t('demand.markOrdered') }}
-                </button>
-                <button class="btn btn-sm" type="button" @click="setAction(line, 'IGNORED')">
-                  {{ t('demand.markIgnored') }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div v-else class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>{{ t('common.item') }}</th>
+                <th class="text-right">{{ t('demand.needed') }}</th>
+                <th>{{ t('demand.requiredDate') }}</th>
+                <th>{{ t('demand.source') }}</th>
+                <th v-if="canManage"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="line in data.items" :key="line.id" class="hover:bg-surface/60">
+                <td>
+                  <span class="font-mono text-xs text-ink/50">{{ line.item_code }}</span>
+                  {{ line.item_description }}
+                </td>
+                <td class="text-right tabular-nums">{{ number(line.quantity_needed) }}</td>
+                <td class="whitespace-nowrap">{{ date(line.required_date) }}</td>
+                <td class="text-ink/60">{{ t(`demand.source${line.source === 'MIN_STOCK' ? 'MinStock' : line.source === 'SALES_ORDER' ? 'Sales' : 'Forecast'}`) }}</td>
+                <td v-if="canManage" class="text-right whitespace-nowrap">
+                  <button class="btn btn-sm" type="button" @click="setAction(line, 'ORDERED')">
+                    {{ t('demand.markOrdered') }}
+                  </button>
+                  <button class="btn btn-sm ml-1" type="button" @click="setAction(line, 'IGNORED')">
+                    {{ t('demand.markIgnored') }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <div v-if="auth.hasRole('admin', 'logistics')" class="card">
-      <div class="card-header">
-        <h2>{{ t('demand.simulator') }}</h2>
-        <span class="muted">{{ t('demand.simulatorHint') }}</span>
-      </div>
+      <div class="card-body">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <h2 class="text-lg font-semibold">{{ t('demand.simulator') }}</h2>
+          <span class="text-sm text-ink/60">{{ t('demand.simulatorHint') }}</span>
+        </div>
 
-      <div class="grid grid-3">
-        <div class="field">
-          <label for="sim-days">{{ t('demand.coverageDays') }}</label>
-          <input
-            id="sim-days"
-            v-model.number="simulator.coverageDays"
-            type="number"
-            min="1"
-            max="365"
-            @input="updateSimulator(simulator.stock)"
-          />
+        <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div>
+            <label class="label-text" for="sim-days">{{ t('demand.coverageDays') }}</label>
+            <input
+              id="sim-days"
+              v-model.number="simulator.coverageDays"
+              class="input w-full"
+              type="number"
+              min="1"
+              max="365"
+              @input="updateSimulator(simulator.stock)"
+            />
+          </div>
+          <div>
+            <label class="label-text" for="sim-consumption">{{ t('demand.dailyConsumption') }}</label>
+            <input
+              id="sim-consumption"
+              v-model.number="simulator.dailyConsumption"
+              class="input w-full"
+              type="number"
+              min="0"
+              step="0.5"
+              @input="updateSimulator(simulator.stock)"
+            />
+          </div>
+          <div>
+            <label class="label-text" for="sim-stock">{{ t('common.stock') }}</label>
+            <input
+              id="sim-stock"
+              class="input w-full"
+              type="number"
+              :value="simulator.stock"
+              min="0"
+              @input="updateSimulator(Number(($event.target as HTMLInputElement).value))"
+            />
+          </div>
         </div>
-        <div class="field">
-          <label for="sim-consumption">{{ t('demand.dailyConsumption') }}</label>
-          <input
-            id="sim-consumption"
-            v-model.number="simulator.dailyConsumption"
-            type="number"
-            min="0"
-            step="0.5"
-            @input="updateSimulator(simulator.stock)"
-          />
-        </div>
-        <div class="field">
-          <label for="sim-stock">{{ t('common.stock') }}</label>
-          <input
-            id="sim-stock"
-            type="number"
-            :value="simulator.stock"
-            min="0"
-            @input="updateSimulator(Number(($event.target as HTMLInputElement).value))"
-          />
-        </div>
-      </div>
 
-      <p class="sim-result">
-        {{ t('demand.suggested') }}:
-        <strong>{{ number(simulator.computed) }}</strong>
-      </p>
+        <p class="mt-2 text-base">
+          {{ t('demand.suggested') }}:
+          <strong class="text-xl tabular-nums">{{ number(simulator.computed) }}</strong>
+        </p>
+      </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.notice {
-  margin: 0;
-  padding: 0.5rem 0.65rem;
-  font-size: 0.8125rem;
-  color: var(--accent-strong);
-  background: var(--accent-soft);
-  border-radius: var(--radius-sm);
-}
-
-.sim-result {
-  margin: 0.5rem 0 0;
-  font-size: 0.9375rem;
-}
-
-.sim-result strong {
-  font-size: 1.25rem;
-  font-variant-numeric: tabular-nums;
-}
-
-td .btn + .btn { margin-left: 0.25rem; }
-</style>

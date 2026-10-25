@@ -1,324 +1,109 @@
-/* ERP-Lite design tokens and base styles. */
+/* ERP-Lite sobre FlyonUI: temas de marca y utilidades semánticas. */
 
-:root {
+@import 'tailwindcss';
+
+@plugin 'flyonui' {
+  themes: light --default, dark --prefersdark, corporate, soft, luxury;
+}
+
+/* Tema claro de marca: conserva la paleta original del ERP. */
+@plugin 'flyonui/theme' {
+  name: 'light';
+  default: true;
   color-scheme: light;
 
-  --surface: #f6f7f9;
-  --surface-raised: #ffffff;
-  --surface-sunken: #eceef2;
-  --border: #d9dde4;
-  --border-strong: #c2c8d2;
+  --color-base-100: #ffffff;
+  --color-base-200: #f6f7f9;
+  --color-base-300: #eceef2;
+  --color-base-content: #16191d;
 
-  --text: #16191d;
-  --text-muted: #5d6470;
-  --text-faint: #8a919d;
+  --color-primary: #2e86ab;
+  --color-primary-content: #ffffff;
+  --color-secondary: #1f6a8a;
+  --color-secondary-content: #ffffff;
+  --color-accent: #e3f0f6;
+  --color-accent-content: #1f6a8a;
+  --color-neutral: #2b3240;
+  --color-neutral-content: #ffffff;
 
-  --accent: #2e86ab;
-  --accent-strong: #1f6a8a;
-  --accent-soft: #e3f0f6;
+  --color-info: #3178c6;
+  --color-info-content: #ffffff;
+  --color-success: #1b7f5a;
+  --color-success-content: #ffffff;
+  --color-warning: #a86a10;
+  --color-warning-content: #ffffff;
+  --color-error: #c0392b;
+  --color-error-content: #ffffff;
 
-  --success: #1b7f5a;
-  --success-soft: #e2f4ec;
-  --warning: #a86a10;
-  --warning-soft: #fbf0dc;
-  --danger: #c0392b;
-  --danger-soft: #fbe6e3;
+  --radius-selector: 0.5rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
 
-  --radius-sm: 4px;
-  --radius: 8px;
-  --radius-lg: 12px;
+/* Equivalente oscuro de la misma paleta. */
+@plugin 'flyonui/theme' {
+  name: 'dark';
+  prefersdark: true;
+  color-scheme: dark;
 
-  --shadow-sm: 0 1px 2px rgb(16 24 40 / 6%);
-  --shadow: 0 1px 3px rgb(16 24 40 / 10%), 0 1px 2px rgb(16 24 40 / 6%);
+  --color-base-100: #1c2127;
+  --color-base-200: #171b20;
+  --color-base-300: #262b33;
+  --color-base-content: #e6e8ec;
 
-  --sidebar-width: 248px;
+  --color-primary: #4aa3c7;
+  --color-primary-content: #07141a;
+  --color-secondary: #7fb9d1;
+  --color-secondary-content: #07141a;
+  --color-accent: #255a6b;
+  --color-accent-content: #d7eef7;
+  /* En oscuro el neutral debe ser claro: es el color de texto de badges y
+     alertas soft, y el fondo de los botones sin variante. */
+  --color-neutral: #9aa3b2;
+  --color-neutral-content: #10151b;
+
+  --color-info: #5aa9e6;
+  --color-info-content: #08131b;
+  --color-success: #3fbf8f;
+  --color-success-content: #071510;
+  --color-warning: #d9a441;
+  --color-warning-content: #1a1204;
+  --color-error: #e06a5c;
+  --color-error-content: #1c0806;
+
+  --radius-selector: 0.5rem;
+  --radius-field: 0.25rem;
+  --radius-box: 0.5rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* FlyonUI no publica sus colores como tokens de Tailwind. Este puente habilita
+   utilidades theme-aware: text-ink, bg-panel, border-sunken, text-danger, etc. */
+@theme inline {
+  --color-panel: var(--color-base-100);
+  --color-surface: var(--color-base-200);
+  --color-sunken: var(--color-base-300);
+  --color-ink: var(--color-base-content);
+  --color-brand: var(--color-primary);
+  --color-ok: var(--color-success);
+  --color-warn: var(--color-warning);
+  --color-danger: var(--color-error);
+
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     'Helvetica Neue', Arial, sans-serif;
   --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body,
-#__nuxt {
-  height: 100%;
-}
-
-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--text);
-  background: var(--surface);
-  -webkit-font-smoothing: antialiased;
-}
-
-h1, h2, h3, h4 {
-  margin: 0 0 0.5rem;
-  font-weight: 600;
-  line-height: 1.25;
-  color: var(--text);
-}
-
-h1 { font-size: 1.5rem; }
-h2 { font-size: 1.175rem; }
-h3 { font-size: 1rem; }
-
-p { margin: 0 0 0.75rem; }
-
-a {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-a:hover { text-decoration: underline; }
-
-/* --- Buttons --- */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
-  font: inherit;
-  font-weight: 500;
-  font-size: 0.875rem;
-  color: var(--text);
-  background: var(--surface-raised);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: background 120ms ease, border-color 120ms ease;
-  white-space: nowrap;
-}
-
-.btn:hover:not(:disabled) {
-  background: var(--surface-sunken);
-}
-
-.btn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  color: #fff;
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
-}
-
-.btn-danger {
-  color: #fff;
-  background: var(--danger);
-  border-color: var(--danger);
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #a5301f;
-}
-
-.btn-ghost {
-  background: transparent;
-  border-color: transparent;
-}
-
-.btn-ghost:hover:not(:disabled) {
-  background: var(--surface-sunken);
-}
-
-.btn-sm {
-  padding: 0.25rem 0.6rem;
-  font-size: 0.8125rem;
-}
-
-/* --- Forms --- */
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  margin-bottom: 0.85rem;
-}
-
-.field label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.field .hint {
-  font-size: 0.75rem;
-  color: var(--text-faint);
-}
-
-input[type='text'],
-input[type='password'],
-input[type='number'],
-input[type='date'],
-input[type='search'],
-select,
-textarea {
-  width: 100%;
-  padding: 0.45rem 0.6rem;
-  font: inherit;
-  font-size: 0.875rem;
-  color: var(--text);
-  background: var(--surface-raised);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  outline-offset: 2px;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: 2px solid var(--accent-soft);
-  border-color: var(--accent);
-}
-
-label.checkbox {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.875rem;
-  font-weight: 400;
-  color: var(--text);
-  cursor: pointer;
-}
-
-label.checkbox input {
-  width: auto;
-  margin: 0;
-}
-
-/* --- Tables --- */
-
-.table-wrap {
-  overflow-x: auto;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-raised);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.875rem;
-}
-
-thead th {
-  position: sticky;
-  top: 0;
-  padding: 0.6rem 0.75rem;
-  text-align: left;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--text-muted);
-  background: var(--surface-sunken);
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-
-tbody td {
-  padding: 0.55rem 0.75rem;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-
-tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover { background: #fafbfc; }
-
-td.numeric,
-th.numeric {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-/* --- Cards --- */
-
-.card {
-  padding: 1rem 1.15rem;
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-}
-
-.card + .card { margin-top: 1rem; }
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.85rem;
-}
-
-.card-header h2,
-.card-header h3 { margin: 0; }
-
-/* --- Utilities --- */
-
-.muted { color: var(--text-muted); }
-.faint { color: var(--text-faint); }
-.mono { font-family: var(--font-mono); font-size: 0.8125rem; }
-.nowrap { white-space: nowrap; }
-.numeric { font-variant-numeric: tabular-nums; }
-.row { display: flex; align-items: center; gap: 0.6rem; }
-.row-between { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.stack { display: flex; flex-direction: column; gap: 1rem; }
-.grow { flex: 1 1 auto; min-width: 0; }
-.text-right { text-align: right; }
-
-.grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.grid-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-
-@media (max-width: 1100px) {
-  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .grid-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 700px) {
-  .grid-2,
-  .grid-3,
-  .grid-4,
-  .grid-6 { grid-template-columns: minmax(0, 1fr); }
-}
-
-/* --- Focus --- */
-
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+@layer base {
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-base-200);
+    color: var(--color-base-content);
+    -webkit-font-smoothing: antialiased;
   }
 }

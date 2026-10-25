@@ -26,66 +26,57 @@ async function setStatus(route: Route, status: 'IN_TRANSIT' | 'DELIVERED') {
 </script>
 
 <template>
-  <div class="stack">
-    <p v-if="notice" class="notice">{{ notice }}</p>
+  <div class="flex flex-col gap-4">
+    <AppNotice v-if="notice" :message="notice" />
 
-    <p v-if="pending" class="muted">{{ t('app.loading') }}</p>
+    <p v-if="pending" class="text-sm text-ink/60">{{ t('app.loading') }}</p>
 
     <div v-else-if="!data?.items.length" class="card">
       <EmptyState :message="t('routes.noRoutes')" />
     </div>
 
-    <div v-else class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>{{ t('routes.code') }}</th>
-            <th>{{ t('routes.carrier') }}</th>
-            <th>{{ t('routes.date') }}</th>
-            <th class="numeric">{{ t('routes.stops') }}</th>
-            <th>{{ t('common.status') }}</th>
-            <th v-if="canManage"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="route in data.items" :key="route.id">
-            <td class="mono nowrap">{{ route.code }}</td>
-            <td>{{ route.carrier }}</td>
-            <td class="nowrap">{{ date(route.date) }}</td>
-            <td class="numeric">{{ number(route.stops) }}</td>
-            <td><StatusBadge :value="route.status" /></td>
-            <td v-if="canManage" class="text-right">
-              <button
-                v-if="route.status === 'PLANNED'"
-                class="btn btn-sm"
-                type="button"
-                @click="setStatus(route, 'IN_TRANSIT')"
-              >
-                {{ t('routes.markInTransit') }}
-              </button>
-              <button
-                v-if="route.status === 'IN_TRANSIT'"
-                class="btn btn-primary btn-sm"
-                type="button"
-                @click="setStatus(route, 'DELIVERED')"
-              >
-                {{ t('routes.markDelivered') }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-else class="card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>{{ t('routes.code') }}</th>
+              <th>{{ t('routes.carrier') }}</th>
+              <th>{{ t('routes.date') }}</th>
+              <th class="text-right">{{ t('routes.stops') }}</th>
+              <th>{{ t('common.status') }}</th>
+              <th v-if="canManage"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="route in data.items" :key="route.id" class="hover:bg-surface/60">
+              <td class="font-mono text-xs whitespace-nowrap">{{ route.code }}</td>
+              <td>{{ route.carrier }}</td>
+              <td class="whitespace-nowrap">{{ date(route.date) }}</td>
+              <td class="text-right tabular-nums">{{ number(route.stops) }}</td>
+              <td><StatusBadge :value="route.status" /></td>
+              <td v-if="canManage" class="text-right whitespace-nowrap">
+                <button
+                  v-if="route.status === 'PLANNED'"
+                  class="btn btn-sm"
+                  type="button"
+                  @click="setStatus(route, 'IN_TRANSIT')"
+                >
+                  {{ t('routes.markInTransit') }}
+                </button>
+                <button
+                  v-if="route.status === 'IN_TRANSIT'"
+                  class="btn btn-primary btn-sm"
+                  type="button"
+                  @click="setStatus(route, 'DELIVERED')"
+                >
+                  {{ t('routes.markDelivered') }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.notice {
-  margin: 0;
-  padding: 0.5rem 0.65rem;
-  font-size: 0.8125rem;
-  color: var(--accent-strong);
-  background: var(--accent-soft);
-  border-radius: var(--radius-sm);
-}
-</style>

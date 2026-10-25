@@ -60,156 +60,130 @@ function stockTone(item: Item): 'ok' | 'near' | 'low' {
   if (item.min_stock > 0 && item.stock < item.min_stock * 1.5) return 'near'
   return 'ok'
 }
+
+// Static class strings so Tailwind detects every badge variant at build time.
+const toneClasses: Record<'ok' | 'near' | 'low', string> = {
+  ok: 'badge badge-soft badge-success',
+  near: 'badge badge-soft badge-warning',
+  low: 'badge badge-soft badge-error',
+}
 </script>
 
 <template>
-  <div class="stack">
-    <div class="card toolbar">
-      <div class="row grow">
-        <label class="visually-hidden" for="item-search">{{ t('app.search') }}</label>
-        <input
-          id="item-search"
-          v-model="search"
-          type="search"
-          class="grow"
-          :placeholder="t('app.search')"
-        />
-        <label class="checkbox">
-          <input v-model="belowMinimum" type="checkbox" />
-          {{ t('warehouse.belowMinimumOnly') }}
-        </label>
+  <div class="flex flex-col gap-4">
+    <div class="card">
+      <div class="card-body">
+        <div class="flex flex-wrap items-center gap-3">
+          <label class="sr-only" for="item-search">{{ t('app.search') }}</label>
+          <input
+            id="item-search"
+            v-model="search"
+            type="search"
+            class="input w-full sm:w-64"
+            :placeholder="t('app.search')"
+          />
+          <label class="flex cursor-pointer items-center gap-2 text-sm">
+            <input v-model="belowMinimum" type="checkbox" class="checkbox checkbox-sm" />
+            {{ t('warehouse.belowMinimumOnly') }}
+          </label>
+        </div>
       </div>
-      <p v-if="notice" class="notice">{{ notice }}</p>
     </div>
 
-    <p v-if="pending" class="muted">{{ t('app.loading') }}</p>
+    <AppNotice v-if="notice" :message="notice" />
+
+    <p v-if="pending" class="text-sm text-ink/60">{{ t('app.loading') }}</p>
 
     <div v-else-if="!data?.items.length" class="card">
       <EmptyState :message="t('warehouse.noItems')" />
     </div>
 
-    <div v-else class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>{{ t('common.code') }}</th>
-            <th>{{ t('common.name') }}</th>
-            <th>{{ t('common.category') }}</th>
-            <th>{{ t('common.location') }}</th>
-            <th class="numeric">{{ t('common.stock') }}</th>
-            <th class="numeric">{{ t('common.minimum') }}</th>
-            <th class="numeric">{{ t('common.cost') }}</th>
-            <th>{{ t('warehouse.stockStatus') }}</th>
-            <th v-if="auth.hasRole('admin', 'logistics')"></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in data.items" :key="item.id">
-            <td class="mono nowrap">{{ item.code }}</td>
-            <td>{{ item.description }}</td>
-            <td class="muted">{{ item.category ?? '—' }}</td>
-            <td class="mono">{{ item.location }}</td>
-            <td class="numeric">{{ number(item.stock) }}</td>
-            <td class="numeric">{{ number(item.min_stock) }}</td>
-            <td class="numeric">{{ money(item.unit_cost, currency) }}</td>
-            <td>
-              <span class="tone" :class="`tone-${stockTone(item)}`">
-                {{ t(`warehouse.${stockTone(item)}`) }}
-              </span>
-            </td>
-            <td v-if="auth.hasRole('admin', 'logistics')" class="text-right">
-              <button class="btn btn-sm" type="button" @click="openAdjustment(item)">
-                {{ t('warehouse.adjust') }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div v-else class="card overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>{{ t('common.code') }}</th>
+              <th>{{ t('common.name') }}</th>
+              <th>{{ t('common.category') }}</th>
+              <th>{{ t('common.location') }}</th>
+              <th class="text-right">{{ t('common.stock') }}</th>
+              <th class="text-right">{{ t('common.minimum') }}</th>
+              <th class="text-right">{{ t('common.cost') }}</th>
+              <th>{{ t('warehouse.stockStatus') }}</th>
+              <th v-if="auth.hasRole('admin', 'logistics')"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="item in data.items" :key="item.id" class="hover:bg-surface/60">
+              <td class="font-mono text-xs whitespace-nowrap">{{ item.code }}</td>
+              <td>{{ item.description }}</td>
+              <td class="text-ink/60">{{ item.category ?? '—' }}</td>
+              <td class="font-mono text-xs">{{ item.location }}</td>
+              <td class="text-right tabular-nums">{{ number(item.stock) }}</td>
+              <td class="text-right tabular-nums">{{ number(item.min_stock) }}</td>
+              <td class="text-right tabular-nums">{{ money(item.unit_cost, currency) }}</td>
+              <td>
+                <span :class="toneClasses[stockTone(item)]">
+                  {{ t(`warehouse.${stockTone(item)}`) }}
+                </span>
+              </td>
+              <td v-if="auth.hasRole('admin', 'logistics')" class="text-right">
+                <button class="btn btn-sm" type="button" @click="openAdjustment(item)">
+                  {{ t('warehouse.adjust') }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Stock adjustment modal -->
-    <div v-if="adjusting" class="modal-backdrop" @click.self="adjusting = null">
-      <div class="modal card" role="dialog" aria-modal="true" :aria-label="t('warehouse.adjustTitle')">
-        <div class="card-header">
-          <h2>{{ t('warehouse.adjustTitle') }}</h2>
+    <!-- Stock adjustment dialog -->
+    <div
+      v-if="adjusting"
+      class="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
+      @click.self="adjusting = null"
+    >
+      <div
+        class="modal-content w-full max-w-md"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="t('warehouse.adjustTitle')"
+      >
+        <div class="modal-header">
+          <h2 class="text-lg font-semibold">{{ t('warehouse.adjustTitle') }}</h2>
+          <button class="btn btn-sm btn-text" type="button" @click="adjusting = null">✕</button>
         </div>
 
-        <p class="muted mono">
-          {{ adjusting.item.code }} · {{ adjusting.item.description }}
-        </p>
-        <p class="muted">
-          {{ t('common.stock') }}: <strong>{{ number(adjusting.item.stock) }}</strong>
-        </p>
+        <div class="modal-body flex flex-col gap-3">
+          <p class="font-mono text-sm text-ink/60">
+            {{ adjusting.item.code }} · {{ adjusting.item.description }}
+          </p>
+          <p class="text-sm">
+            {{ t('common.stock') }}: <strong class="tabular-nums">{{ number(adjusting.item.stock) }}</strong>
+          </p>
 
-        <div class="field">
-          <label for="adjust-qty">{{ t('warehouse.adjustQuantity') }}</label>
-          <input id="adjust-qty" v-model.number="adjusting.quantity" type="number" step="1" />
-          <span class="hint">Negative values reduce stock.</span>
+          <div>
+            <label class="label-text" for="adjust-qty">{{ t('warehouse.adjustQuantity') }}</label>
+            <input id="adjust-qty" v-model.number="adjusting.quantity" class="input w-full" type="number" step="1" />
+            <span class="helper-text">Negative values reduce stock.</span>
+          </div>
+
+          <div>
+            <label class="label-text" for="adjust-reason">{{ t('warehouse.adjustReason') }}</label>
+            <input id="adjust-reason" v-model="adjusting.reason" class="input w-full" type="text" />
+            <span class="helper-text">{{ t('warehouse.adjustReasonHint') }}</span>
+          </div>
         </div>
 
-        <div class="field">
-          <label for="adjust-reason">{{ t('warehouse.adjustReason') }}</label>
-          <input id="adjust-reason" v-model="adjusting.reason" type="text" />
-          <span class="hint">{{ t('warehouse.adjustReasonHint') }}</span>
-        </div>
-
-        <div class="row">
+        <div class="modal-footer">
+          <button class="btn" type="button" @click="adjusting = null">{{ t('app.cancel') }}</button>
           <button class="btn btn-primary" type="button" @click="submitAdjustment">
             {{ t('app.save') }}
           </button>
-          <button class="btn" type="button" @click="adjusting = null">{{ t('app.cancel') }}</button>
         </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.notice { margin: 0; font-size: 0.8125rem; color: var(--accent-strong); }
-
-.tone {
-  display: inline-block;
-  padding: 0.1rem 0.45rem;
-  font-size: 0.75rem;
-  font-weight: 500;
-  border-radius: 999px;
-}
-
-.tone-ok { color: var(--success); background: var(--success-soft); }
-.tone-near { color: var(--warning); background: var(--warning-soft); }
-.tone-low { color: var(--danger); background: var(--danger-soft); }
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 1.5rem;
-  background: rgb(16 24 40 / 45%);
-  z-index: 50;
-}
-
-.modal {
-  width: 100%;
-  max-width: 26rem;
-  margin: 0;
-  box-shadow: var(--shadow);
-}
-</style>
