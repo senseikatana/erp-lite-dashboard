@@ -7,6 +7,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.1] - 2026-10-25
+
+Highlights: fix: theme: update theme-related styles and components to FlyonUI (#1), plus 1 more change.
+
+- 🔹 added 7 packages, and audited 8 packages in 929ms `020e16e`
+  - `.husky/pre-commit`
+  - `Makefile`
+  - `README.md`
+  - `backend/.env.example`
+  - `backend/app/api/v1/endpoints/admin.py`
+  - `backend/app/api/v1/endpoints/companies.py`
+  - `backend/app/api/v1/router.py`
+  - `backend/app/core/config.py`
+  - `backend/tests/test_admin_purge.py`
+  - `backend/tests/test_companies.py`
+  - `frontend/components/ThemeToggle.vue`
+  - `frontend/components/UserMenu.vue`
+  - `frontend/composables/useApi.ts`
+  - `frontend/i18n/locales/ca.json`
+  - `frontend/i18n/locales/en.json`
+  - `frontend/i18n/locales/es.json`
+  - `frontend/layouts/default.vue`
+  - `package-lock.json`
+  - `package.json`
+- 🐛 fix: theme: update theme-related styles and components to FlyonUI (#1) `22f2257`
+  - `frontend/app.vue`
+  - `frontend/assets/css/main.css`
+  - `frontend/components/AppNotice.vue`
+  - `frontend/components/CompanySwitcher.vue`
+  - `frontend/components/EmptyState.vue`
+  - `frontend/components/KpiCard.vue`
+  - `frontend/components/LanguageSwitcher.vue`
+  - `frontend/components/StatCard.vue`
+  - `frontend/components/StatusBadge.vue`
+  - `frontend/components/ThemeSwitcher.vue`
+  - `frontend/composables/useTheme.ts`
+  - `frontend/error.vue`
+  - `frontend/i18n/locales/ca.json`
+  - `frontend/i18n/locales/en.json`
+  - `frontend/i18n/locales/es.json`
+  - `frontend/layouts/auth.vue`
+  - `frontend/layouts/default.vue`
+  - `frontend/nuxt.config.ts`
+  - `frontend/package-lock.json`
+  - `frontend/package.json`
+  - `frontend/pages/activity.vue`
+  - `frontend/pages/demand.vue`
+  - `frontend/pages/index.vue`
+  - `frontend/pages/login.vue`
+  - `frontend/pages/purchases.vue`
+  - `frontend/pages/routes.vue`
+  - `frontend/pages/sales.vue`
+  - `frontend/pages/warehouse.vue`
+- 🐛 fix: update .gitignore and CHANGELOG.md files `cc62e93`
+- 📝 docs(modules): add CompanyConfig, Customer and DemandLine `6974c1b`
+
 ## [0.2.0]
 
 Complete rewrite of the application: the Streamlit prototype is gone, replaced

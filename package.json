@@ -1,6 +1,6 @@
 {
   "name": "erp-lite",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "ERP-Lite monorepo: FastAPI backend and Nuxt frontend",
   "scripts": {
