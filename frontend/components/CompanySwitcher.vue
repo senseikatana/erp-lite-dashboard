@@ -11,11 +11,11 @@ async function onChange(event: Event) {
 </script>
 
 <template>
-  <div class="company-switcher">
-    <label class="switcher-label" for="company-switcher">{{ t('common.company') }}</label>
+  <div>
+    <label class="label-text" for="company-switcher">{{ t('common.company') }}</label>
     <select
       id="company-switcher"
-      class="switcher-select"
+      class="select select-sm w-full"
       :value="auth.activeCompany ?? ''"
       @change="onChange"
     >
@@ -25,23 +25,3 @@ async function onChange(event: Event) {
     </select>
   </div>
 </template>
-
-<style scoped>
-.company-switcher {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.switcher-label {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-faint);
-}
-
-.switcher-select {
-  font-size: 0.8125rem;
-}
-</style>

@@ -41,161 +41,76 @@ const demoAccounts = ['admin', 'buyer', 'logistics', 'quality']
 </script>
 
 <template>
-  <div class="login">
-    <div class="login-card">
-      <div class="login-head">
-        <span class="login-mark" aria-hidden="true">▤</span>
-        <p class="login-brand">{{ t('app.title') }}</p>
-        <h1>{{ t('login.title') }}</h1>
-        <p class="muted">{{ t('login.subtitle') }}</p>
-      </div>
-
-      <form @submit.prevent="submit">
-        <div class="field">
-          <label for="username">{{ t('login.username') }}</label>
-          <input
-            id="username"
-            v-model="username"
-            type="text"
-            autocomplete="username"
-            required
-            autofocus
-          />
-        </div>
-
-        <div class="field">
-          <label for="password">{{ t('login.password') }}</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            autocomplete="current-password"
-            required
-          />
-        </div>
-
-        <p v-if="error" class="login-error" role="alert">{{ error }}</p>
-
-        <button class="btn btn-primary login-submit" type="submit" :disabled="busy">
-          {{ busy ? t('app.loading') : t('login.submit') }}
-        </button>
-      </form>
-
-      <div class="login-demo">
-        <p class="demo-title">{{ t('login.demoAccounts') }}</p>
-        <div class="demo-accounts">
-          <button
-            v-for="account in demoAccounts"
-            :key="account"
-            class="demo-chip"
-            type="button"
-            @click="username = account; password = 'demo1234'"
+  <div class="w-full max-w-sm">
+    <div class="card">
+      <div class="card-body">
+        <div class="mb-2 text-center">
+          <span
+            class="text-bg-primary mx-auto mb-2 grid size-11 place-items-center rounded-lg text-lg"
+            aria-hidden="true"
           >
-            {{ account }}
-          </button>
+            ▤
+          </span>
+          <p class="text-xs font-semibold tracking-wide text-ink/60">{{ t('app.title') }}</p>
+          <h1 class="text-xl font-semibold">{{ t('login.title') }}</h1>
+          <p class="text-sm text-ink/60">{{ t('login.subtitle') }}</p>
         </div>
-        <p class="demo-hint faint">{{ t('login.password') }}: <code>demo1234</code></p>
-        <p class="demo-hint faint">{{ t('login.hint') }}</p>
+
+        <form class="flex flex-col gap-3" @submit.prevent="submit">
+          <div>
+            <label class="label-text" for="username">{{ t('login.username') }}</label>
+            <input
+              id="username"
+              v-model="username"
+              class="input w-full"
+              type="text"
+              autocomplete="username"
+              required
+              autofocus
+            />
+          </div>
+
+          <div>
+            <label class="label-text" for="password">{{ t('login.password') }}</label>
+            <input
+              id="password"
+              v-model="password"
+              class="input w-full"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+
+          <AppNotice v-if="error" :message="error" tone="error" />
+
+          <button class="btn btn-primary w-full" type="submit" :disabled="busy">
+            {{ busy ? t('app.loading') : t('login.submit') }}
+          </button>
+        </form>
+
+        <div class="mt-2 border-t border-sunken pt-4">
+          <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-ink/60">
+            {{ t('login.demoAccounts') }}
+          </p>
+          <div class="flex flex-wrap gap-1.5">
+            <button
+              v-for="account in demoAccounts"
+              :key="account"
+              class="btn btn-xs btn-soft"
+              type="button"
+              @click="username = account; password = 'demo1234'"
+            >
+              {{ account }}
+            </button>
+          </div>
+          <p class="mt-2 text-xs text-ink/50">
+            {{ t('login.password') }}:
+            <code class="rounded bg-sunken px-1 py-0.5 font-mono">demo1234</code>
+          </p>
+          <p class="mt-1 text-xs text-ink/50">{{ t('login.hint') }}</p>
+        </div>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.login { width: 100%; max-width: 25rem; }
-
-.login-card {
-  padding: 1.75rem 1.6rem;
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-}
-
-.login-head {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-.login-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  margin-bottom: 0.6rem;
-  font-size: 1.15rem;
-  color: #fff;
-  background: var(--accent);
-  border-radius: var(--radius);
-}
-
-.login-brand {
-  margin: 0 0 0.3rem;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  color: var(--text-muted);
-}
-
-.login-head h1 { margin: 0 0 0.15rem; font-size: 1.35rem; }
-.login-head p { margin: 0; font-size: 0.8125rem; }
-
-.login-submit { width: 100%; margin-top: 0.25rem; }
-
-.login-error {
-  margin: 0 0 0.75rem;
-  padding: 0.5rem 0.65rem;
-  font-size: 0.8125rem;
-  color: var(--danger);
-  background: var(--danger-soft);
-  border: 1px solid #f0c1ba;
-  border-radius: var(--radius-sm);
-}
-
-.login-demo {
-  margin-top: 1.5rem;
-  padding-top: 1.1rem;
-  border-top: 1px solid var(--border);
-}
-
-.demo-title {
-  margin: 0 0 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-}
-
-.demo-accounts { display: flex; flex-wrap: wrap; gap: 0.35rem; }
-
-.demo-chip {
-  padding: 0.2rem 0.55rem;
-  font: inherit;
-  font-size: 0.8125rem;
-  color: var(--text);
-  background: var(--surface-sunken);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.demo-chip:hover {
-  background: var(--accent-soft);
-  border-color: #b8d8e6;
-  color: var(--accent-strong);
-}
-
-.demo-hint {
-  margin: 0.5rem 0 0;
-  font-size: 0.75rem;
-}
-
-.demo-hint code {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  padding: 0.05rem 0.25rem;
-  background: var(--surface-sunken);
-  border-radius: 3px;
-}
-</style>

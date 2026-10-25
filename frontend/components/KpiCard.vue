@@ -17,66 +17,28 @@ const hasValue = computed(() => props.kpi.value !== null && props.kpi.value !== 
 </script>
 
 <template>
-  <div class="card kpi">
-    <p class="kpi-label">{{ label }}</p>
+  <div class="card">
+    <div class="card-body gap-1 p-4">
+      <p class="text-xs font-semibold uppercase tracking-wide text-ink/60">{{ label }}</p>
 
-    <template v-if="hasValue">
-      <p class="kpi-value">
-        {{ number(kpi.value, kpi.unit === '%' ? 1 : 1) }}
-        <span v-if="kpi.unit" class="kpi-unit">{{ kpi.unit }}</span>
-      </p>
-      <p v-if="kpi.delta !== null" class="kpi-delta" :class="kpi.delta >= 0 ? 'up' : 'down'">
-        {{ kpi.delta >= 0 ? '▲' : '▼' }} {{ number(Math.abs(kpi.delta), 1) }}
-      </p>
-    </template>
+      <template v-if="hasValue">
+        <p class="text-2xl font-semibold leading-tight tabular-nums">
+          {{ number(kpi.value, 1) }}
+          <span v-if="kpi.unit" class="text-sm font-medium text-ink/60">{{ kpi.unit }}</span>
+        </p>
+        <p
+          v-if="kpi.delta !== null"
+          class="text-xs"
+          :class="kpi.delta >= 0 ? 'text-ok' : 'text-danger'"
+        >
+          {{ kpi.delta >= 0 ? '▲' : '▼' }} {{ number(Math.abs(kpi.delta), 1) }}
+        </p>
+      </template>
 
-    <template v-else>
-      <p class="kpi-value kpi-empty">{{ t('kpi.noData') }}</p>
-      <p class="kpi-hint">{{ t('kpi.noDataHint') }}</p>
-    </template>
+      <template v-else>
+        <p class="text-base font-medium text-ink/50">{{ t('kpi.noData') }}</p>
+        <p class="text-xs text-ink/50">{{ t('kpi.noDataHint') }}</p>
+      </template>
+    </div>
   </div>
 </template>
-
-<style scoped>
-.kpi { display: flex; flex-direction: column; gap: 0.15rem; }
-
-.kpi-label {
-  margin: 0;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--text-muted);
-}
-
-.kpi-value {
-  margin: 0.15rem 0 0;
-  font-size: 1.75rem;
-  font-weight: 600;
-  line-height: 1.1;
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-}
-
-.kpi-unit {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-muted);
-}
-
-.kpi-empty {
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--text-faint);
-}
-
-.kpi-hint,
-.kpi-delta {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--text-faint);
-}
-
-.kpi-delta.up { color: var(--success); }
-.kpi-delta.down { color: var(--danger); }
-</style>
