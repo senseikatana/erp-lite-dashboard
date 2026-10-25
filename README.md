@@ -32,14 +32,14 @@ This is an early-stage project. Be precise about what that means.
 
 **Not built yet — do not assume any of these exist:**
 
-| Not built | Note |
-| --- | --- |
+| Not built                                   | Note                                                                                                                                                                                   |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Business Central / Dynamics NAV integration | There is no connector. The `GET /routes` endpoint is **shipment routes for transport planning**, not an ERP connector. The name collision is unfortunate and worth stating explicitly. |
-| PDF / Excel export | No export of any kind |
-| Single sign-on | Local username and password only, no OAuth, OIDC or SAML |
-| Alembic migrations | The schema is bootstrapped with `create_all`. Introduce Alembic once the schema starts changing between deployments. |
-| Email, notifications, background jobs | None |
-| Front-end test suite | The pytest suite covers the API only |
+| PDF / Excel export                          | No export of any kind                                                                                                                                                                  |
+| Single sign-on                              | Local username and password only, no OAuth, OIDC or SAML                                                                                                                               |
+| Alembic migrations                          | The schema is bootstrapped with `create_all`. Introduce Alembic once the schema starts changing between deployments.                                                                   |
+| Email, notifications, background jobs       | None                                                                                                                                                                                   |
+| Front-end test suite                        | The pytest suite covers the API only                                                                                                                                                   |
 
 ---
 
@@ -55,11 +55,23 @@ make dev     # runs both servers; Ctrl-C stops both
 
 Then open:
 
-| URL | What |
-| --- | --- |
-| <http://localhost:3000> | The dashboard |
-| <http://localhost:8000/docs> | Interactive OpenAPI documentation |
+| URL                            | What                                     |
+| ------------------------------ | ---------------------------------------- |
+| <http://localhost:3000>        | The dashboard                            |
+| <http://localhost:8000/docs>   | Interactive OpenAPI documentation        |
 | <http://localhost:8000/health> | Liveness and database connectivity probe |
+
+### With Bun
+
+```bash
+bun run dev          # API + Nuxt together; Ctrl-C stops both
+bun run backend      # API only
+bun run frontend     # Nuxt only (bun --cwd=frontend run dev)
+bun run seed         # reload demo data
+```
+
+The Nuxt dev server uses 3001 when 3000 is already occupied; the API CORS
+defaults already allow both ports.
 
 ### Without the Makefile
 
@@ -96,12 +108,12 @@ make clean      # remove build artefacts and the local database
 All four roles are seeded so every permission path can be exercised. The
 password is `demo1234` for every one of them.
 
-| Username | Role | Companies | Can do |
-| --- | --- | --- | --- |
-| `admin` | admin | `DEMO_SL`, `ACME_SA` | Everything, in every company |
-| `buyer` | buyer | `DEMO_SL` | Raise purchase orders, run the demand worksheet |
-| `logistics` | logistics | `DEMO_SL` | Receive goods, pick and ship, manage items and routes |
-| `quality` | quality | `DEMO_SL` | Approve or reject received goods |
+| Username    | Role      | Companies            | Can do                                                |
+| ----------- | --------- | -------------------- | ----------------------------------------------------- |
+| `admin`     | admin     | `DEMO_SL`, `ACME_SA` | Everything, in every company                          |
+| `buyer`     | buyer     | `DEMO_SL`            | Raise purchase orders, run the demand worksheet       |
+| `logistics` | logistics | `DEMO_SL`            | Receive goods, pick and ship, manage items and routes |
+| `quality`   | quality   | `DEMO_SL`            | Approve or reject received goods                      |
 
 ---
 
@@ -167,11 +179,11 @@ With a discriminator, a grant is one row in `user_company_access`.
 endpoint that touches business data depends on it, so a query that forgot to
 filter by company cannot reach the data layer. It returns:
 
-| Situation | Status |
-| --- | --- |
-| Unknown company code | `404` |
-| Known company, caller has no grant | `403` |
-| Grant present | `200`, company bound to the request |
+| Situation                          | Status                              |
+| ---------------------------------- | ----------------------------------- |
+| Unknown company code               | `404`                               |
+| Known company, caller has no grant | `403`                               |
+| Grant present                      | `200`, company bound to the request |
 
 The frontend sends the active company as a `?company=` query parameter on
 every request, so no request can silently run against "whatever the last
@@ -199,8 +211,8 @@ Every business state change is appended to `activity_events`
 (`app/services/activity.py`). The table is append-only by design: there is no
 `updated_at` column because a recorded event is never edited.
 
-**Why.** A counter such as `qty_picked` tells you *how much* was picked but
-never *when*. "Picks per hour" is unanswerable without a record of the event
+**Why.** A counter such as `qty_picked` tells you _how much_ was picked but
+never _when_. "Picks per hour" is unanswerable without a record of the event
 itself. The same log is the audit trail: who changed what, and when.
 
 This replaced the prototype's hardcoded dashboard numbers. The writer flushes
@@ -246,13 +258,13 @@ cd backend
 
 The inventory rules, and the reason each one exists:
 
-| Rule | Reason |
-| --- | --- |
-| A goods receipt does **not** increase stock | Goods sit in `QC_PENDING`, invisible to inventory, until Quality accepts them |
-| Stock increases only on a Quality approval | Approval is the gate, so the receipt cannot silently create inventory |
-| Each line posts its quantity **exactly once**, guarded by the `stock_posted` column | The prototype added stock on every click, so approving twice inflated inventory. Regression test: `test_repeat_approval_does_not_inflate_stock` |
-| A rejection returns the order to `OPEN` and leaves stock untouched | The vendor needs an order they can rework or resupply |
-| Manual corrections go through `POST /warehouse/items/{id}/adjust`, require a reason, and are logged | A stock discrepancy must always trace back to a person and a justification |
+| Rule                                                                                                | Reason                                                                                                                                          |
+| --------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| A goods receipt does **not** increase stock                                                         | Goods sit in `QC_PENDING`, invisible to inventory, until Quality accepts them                                                                   |
+| Stock increases only on a Quality approval                                                          | Approval is the gate, so the receipt cannot silently create inventory                                                                           |
+| Each line posts its quantity **exactly once**, guarded by the `stock_posted` column                 | The prototype added stock on every click, so approving twice inflated inventory. Regression test: `test_repeat_approval_does_not_inflate_stock` |
+| A rejection returns the order to `OPEN` and leaves stock untouched                                  | The vendor needs an order they can rework or resupply                                                                                           |
+| Manual corrections go through `POST /warehouse/items/{id}/adjust`, require a reason, and are logged | A stock discrepancy must always trace back to a person and a justification                                                                      |
 
 An approval only sticks when every line passed. A partial pass posts the
 passed lines and returns the order to `OPEN` with the rejected line ids in the
@@ -272,10 +284,10 @@ services goes through `Decimal`, never through a float round-trip.
 
 A bare status string is never accepted. Two tables decide every transition:
 
-| Table | Where | Purpose |
-| --- | --- | --- |
-| `ALLOWED_TRANSITIONS` | `sales_service.py` | Which states may follow which |
-| `ROLE_PERMISSIONS` | `sales_service.py`, `purchasing_service.py` | Which roles may drive each transition |
+| Table                 | Where                                       | Purpose                               |
+| --------------------- | ------------------------------------------- | ------------------------------------- |
+| `ALLOWED_TRANSITIONS` | `sales_service.py`                          | Which states may follow which         |
+| `ROLE_PERMISSIONS`    | `sales_service.py`, `purchasing_service.py` | Which roles may drive each transition |
 
 An `OPEN → SHIPPED` transition that skips `PICKING` is rejected with `409`, and
 so is a role attempting a transition it may not perform. `can_transition()`
@@ -286,12 +298,12 @@ specific, actionable HTTP error rather than a generic failure.
 
 ## Roles and permissions
 
-| Role | Purchase orders | Goods receipt | Quality decision | Picking & shipping | Items & routes |
-| --- | --- | --- | --- | --- | --- |
-| `admin` | yes | yes | yes | yes | yes |
-| `buyer` | yes | no | no | no | no |
-| `logistics` | no | yes | no | yes | yes |
-| `quality` | no | no | yes | no | no |
+| Role        | Purchase orders | Goods receipt | Quality decision | Picking & shipping | Items & routes |
+| ----------- | --------------- | ------------- | ---------------- | ------------------ | -------------- |
+| `admin`     | yes             | yes           | yes              | yes                | yes            |
+| `buyer`     | yes             | no            | no               | no                 | no             |
+| `logistics` | no              | yes           | no               | yes                | yes            |
+| `quality`   | no              | no            | yes              | no                 | no             |
 
 **Receiving and inspecting are deliberately separate duties.** The role that
 books a delivery (`logistics`) cannot also approve it (`quality`). Without that
@@ -313,12 +325,12 @@ only. The backend enforces the real thing, in `app/api/deps.py`
 
 Computed per company, always scoped to the active tenant.
 
-| KPI | Formula | Default window | Returns `null` when |
-| --- | --- | --- | --- |
-| **Order accuracy** | `sum(qty_shipped) / sum(quantity) × 100` across orders in `SHIPPED` or `INVOICED` | 30 days | Nothing ordered in the window — there is no denominator |
-| **Picks per hour** | count of sales orders entering `PICKING`, divided by the hours between the first and last such event (floored at 1 h) | 30 days | No pick was recorded |
-| **Dock to stock** | mean hours between a `received` event and the matching `qc_approved` event on the same order | 90 days | No completed QC cycle, or an approval with no matching receipt |
-| **Inventory turnover** | COGS (`sum(quantity × unit_price)` on shipped/invoiced lines) ÷ inventory value (`sum(stock × unit_cost)`) | 90 days | Inventory value is zero |
+| KPI                    | Formula                                                                                                               | Default window | Returns `null` when                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------- | -------------------------------------------------------------- |
+| **Order accuracy**     | `sum(qty_shipped) / sum(quantity) × 100` across orders in `SHIPPED` or `INVOICED`                                     | 30 days        | Nothing ordered in the window — there is no denominator        |
+| **Picks per hour**     | count of sales orders entering `PICKING`, divided by the hours between the first and last such event (floored at 1 h) | 30 days        | No pick was recorded                                           |
+| **Dock to stock**      | mean hours between a `received` event and the matching `qc_approved` event on the same order                          | 90 days        | No completed QC cycle, or an approval with no matching receipt |
+| **Inventory turnover** | COGS (`sum(quantity × unit_price)` on shipped/invoiced lines) ÷ inventory value (`sum(stock × unit_cost)`)            | 90 days        | Inventory value is zero                                        |
 
 Under 100% order accuracy means the warehouse shipped short. Turnover is a
 snapshot measure: with no historical inventory readings the current value is
@@ -336,22 +348,22 @@ until snapshots exist.
 Copy `backend/.env.example` to `backend/.env`. Every value below is read from
 the environment through Pydantic Settings.
 
-| Variable | Default | Notes |
-| --- | --- | --- |
-| `ENVIRONMENT` | `development` | Free-form label, surfaced by `/health` |
-| `DEBUG` | `true` | |
-| `SQL_ECHO` | `false` | Logs every statement. Separate from `DEBUG` because statement logging drowns CLI tools like the seeder |
-| `DATABASE_URL` | `sqlite:///backend/erp_lite.db` | A bare path is accepted and normalised to a SQLite URL |
-| `SECRET_KEY` | dev placeholder | **Override everywhere.** HS256 needs at least 32 bytes. Generate with `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | `720` | 12 hours |
-| `ALGORITHM` | `HS256` | |
-| `CORS_ORIGINS` | `["http://localhost:3000"]` | JSON list |
-| `DEFAULT_COMPANY` | `DEMO_SL` | Preferred landing company when the caller holds a grant to it |
+| Variable                      | Default                         | Notes                                                                                                                                |
+| ----------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `ENVIRONMENT`                 | `development`                   | Free-form label, surfaced by `/health`                                                                                               |
+| `DEBUG`                       | `true`                          |                                                                                                                                      |
+| `SQL_ECHO`                    | `false`                         | Logs every statement. Separate from `DEBUG` because statement logging drowns CLI tools like the seeder                               |
+| `DATABASE_URL`                | `sqlite:///backend/erp_lite.db` | A bare path is accepted and normalised to a SQLite URL                                                                               |
+| `SECRET_KEY`                  | dev placeholder                 | **Override everywhere.** HS256 needs at least 32 bytes. Generate with `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `720`                           | 12 hours                                                                                                                             |
+| `ALGORITHM`                   | `HS256`                         |                                                                                                                                      |
+| `CORS_ORIGINS`                | `["http://localhost:3000"]`     | JSON list                                                                                                                            |
+| `DEFAULT_COMPANY`             | `DEMO_SL`                       | Preferred landing company when the caller holds a grant to it                                                                        |
 
 ### Frontend (`frontend/.env`)
 
-| Variable | Default |
-| --- | --- |
+| Variable               | Default                        |
+| ---------------------- | ------------------------------ |
 | `NUXT_PUBLIC_API_BASE` | `http://localhost:8000/api/v1` |
 
 ### SQLite or PostgreSQL
@@ -400,28 +412,28 @@ being useless.
 Base prefix `/api/v1`. Interactive documentation at <http://localhost:8000/docs>
 is the authoritative reference; this is a map, not a dump.
 
-| Module | Prefix | What it covers |
-| --- | --- | --- |
-| meta | *(none)* | `GET /health` — liveness plus a real database round-trip. Unauthenticated |
-| auth | `/auth` | Login, `/me`, change own password. User administration (`GET`/`POST /users`, `PATCH /users/{id}`) is admin-only and blocks an admin from removing their own access |
-| companies | `/companies` | List accessible companies, read and update the current one |
-| dashboard | `/dashboard` | `/summary` (KPIs + headline counts), `/alerts`, `/stock-levels`, `/routes`, `/activity` |
-| sales | `/sales/orders` | List, read, create, `PATCH /{id}/status`, `DELETE /{id}` |
-| purchases | `/purchases/orders` | List, `/awaiting-quality`, read, create, `POST /{id}/receive`, `POST /{id}/quality` |
-| warehouse | `/warehouse` | Items CRUD, `/locations`, `POST /items/{id}/adjust` |
-| partners | `/customers`, `/vendors` | Business partner CRUD |
-| planning | `/demand`, `/routes` | Demand worksheet list, `POST /demand/generate`, `PATCH /demand/{id}`; transport route CRUD |
-| activity | `/activity` | Paginated audit feed |
+| Module    | Prefix                   | What it covers                                                                                                                                                     |
+| --------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| meta      | _(none)_                 | `GET /health` — liveness plus a real database round-trip. Unauthenticated                                                                                          |
+| auth      | `/auth`                  | Login, `/me`, change own password. User administration (`GET`/`POST /users`, `PATCH /users/{id}`) is admin-only and blocks an admin from removing their own access |
+| companies | `/companies`             | List accessible companies, read and update the current one                                                                                                         |
+| dashboard | `/dashboard`             | `/summary` (KPIs + headline counts), `/alerts`, `/stock-levels`, `/routes`, `/activity`                                                                            |
+| sales     | `/sales/orders`          | List, read, create, `PATCH /{id}/status`, `DELETE /{id}`                                                                                                           |
+| purchases | `/purchases/orders`      | List, `/awaiting-quality`, read, create, `POST /{id}/receive`, `POST /{id}/quality`                                                                                |
+| warehouse | `/warehouse`             | Items CRUD, `/locations`, `POST /items/{id}/adjust`                                                                                                                |
+| partners  | `/customers`, `/vendors` | Business partner CRUD                                                                                                                                              |
+| planning  | `/demand`, `/routes`     | Demand worksheet list, `POST /demand/generate`, `PATCH /demand/{id}`; transport route CRUD                                                                         |
+| activity  | `/activity`              | Paginated audit feed                                                                                                                                               |
 
 Status codes that matter:
 
-| Code | Meaning |
-| --- | --- |
-| `401` | Missing, invalid or expired token — or a token issued before the account was deactivated |
-| `403` | Authenticated, but no grant for this company or the role may not do this |
+| Code  | Meaning                                                                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `401` | Missing, invalid or expired token — or a token issued before the account was deactivated                                                          |
+| `403` | Authenticated, but no grant for this company or the role may not do this                                                                          |
 | `404` | Unknown record **within the caller's company**. A record in another tenant is a `404`, not a `403`, so an outsider cannot probe for its existence |
-| `409` | Workflow violation: an illegal transition, a role attempting one, or receiving against an order already past the gate |
-| `422` | Domain validation error. Services raise `ValueError` subclasses and a global handler maps them to `422` instead of `500` |
+| `409` | Workflow violation: an illegal transition, a role attempting one, or receiving against an order already past the gate                             |
+| `422` | Domain validation error. Services raise `ValueError` subclasses and a global handler maps them to `422` instead of `500`                          |
 
 List endpoints accept `limit` (1–500, default 50) and `offset`, and return
 `{ "items": [...], "meta": { "total", "limit", "offset" } }`.
@@ -439,13 +451,13 @@ cd backend && .venv/bin/python -m pytest -q
 The suite runs against an in-memory SQLite database, so it is hermetic and can
 never touch a developer's working data. Coverage:
 
-| File | What it protects |
-| --- | --- |
-| `test_auth.py` | Login, indistinguishable failures for unknown user and wrong password, deactivated accounts cannot use a still-valid token, tenant isolation, admin reaching an ungranted company, unknown company is a `404` |
-| `test_sales_workflow.py` | The full `OPEN → INVOICED` path, skipping a step is rejected, a buyer cannot start picking, logistics cannot invoice, line counters update, the status change is logged, cross-tenant reads fail |
+| File                          | What it protects                                                                                                                                                                                                     |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `test_auth.py`                | Login, indistinguishable failures for unknown user and wrong password, deactivated accounts cannot use a still-valid token, tenant isolation, admin reaching an ungranted company, unknown company is a `404`        |
+| `test_sales_workflow.py`      | The full `OPEN → INVOICED` path, skipping a step is rejected, a buyer cannot start picking, logistics cannot invoice, line counters update, the status change is logged, cross-tenant reads fail                     |
 | `test_purchasing_workflow.py` | Receipt does not increase stock, approval posts stock, **repeat approval does not inflate stock**, logistics cannot approve quality, rejection leaves stock untouched, adjustments are logged and cannot go negative |
-| `test_kpi_service.py` | KPIs are `null` on an empty installation, `picks_per_hour` uses the activity span, dock-to-stock measures receipt to approval and ignores orphan approvals, turnover is `null` on empty inventory, alerts fire |
-| `test_endpoints_smoke.py` | Every collection endpoint returns 200 without a server error, tenant scoping on the read endpoints, pagination metadata, the OpenAPI schema builds, the seeder runs end to end |
+| `test_kpi_service.py`         | KPIs are `null` on an empty installation, `picks_per_hour` uses the activity span, dock-to-stock measures receipt to approval and ignores orphan approvals, turnover is `null` on empty inventory, alerts fire       |
+| `test_endpoints_smoke.py`     | Every collection endpoint returns 200 without a server error, tenant scoping on the read endpoints, pagination metadata, the OpenAPI schema builds, the seeder runs end to end                                       |
 
 The smoke file exists for a reason worth remembering: a schema module once
 referenced a type it never imported. The endpoint existed, routed correctly,

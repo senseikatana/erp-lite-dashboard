@@ -27,7 +27,15 @@
     "demand": "Full de demanda",
     "routes": "Rutes i transport",
     "activity": "Registre d'activitat",
-    "signOut": "Tanca la sessió"
+    "signOut": "Tanca la sessió",
+    "hideSidebar": "Amagar menú lateral",
+    "showSidebar": "Mostrar menú lateral"
+  },
+  "user": {
+    "menu": "Menú d'usuari",
+    "themeToggle": "Canviar tema",
+    "purge": "Purgar dades de l'empresa",
+    "purgeConfirm": "Vols eliminar totes les comandes, articles, rutes i activitat de {company}? Aquesta acció no es pot desfer."
   },
   "login": {
     "title": "Inicia la sessió",

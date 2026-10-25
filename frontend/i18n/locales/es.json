@@ -27,7 +27,15 @@
     "demand": "Hoja de demanda",
     "routes": "Rutas y transporte",
     "activity": "Registro de actividad",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "hideSidebar": "Ocultar menú lateral",
+    "showSidebar": "Mostrar menú lateral"
+  },
+  "user": {
+    "menu": "Menú de usuario",
+    "themeToggle": "Cambiar tema",
+    "purge": "Purgar datos de la empresa",
+    "purgeConfirm": "¿Eliminar todos los pedidos, artículos, rutas y actividad de {company}? Esta acción no se puede deshacer."
   },
   "login": {
     "title": "Iniciar sesión",

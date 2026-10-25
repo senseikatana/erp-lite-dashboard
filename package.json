@@ -1,0 +1,25 @@
+{
+  "name": "erp-lite",
+  "version": "0.2.0",
+  "private": true,
+  "description": "ERP-Lite monorepo: FastAPI backend and Nuxt frontend",
+  "scripts": {
+    "dev": "sh -c 'bun run dev:backend & bun run dev:frontend & wait'",
+    "dev:backend": "cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000",
+    "dev:frontend": "bun --cwd=frontend run dev",
+    "backend": "bun run dev:backend",
+    "frontend": "bun run dev:frontend",
+    "seed": "cd backend && .venv/bin/python -m app.seed",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,mjs,cjs,json,jsonc,md,yml,yaml,css,scss,html}": [
+      "prettier --write"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10"
+  }
+}

@@ -22,7 +22,7 @@ def list_companies(db: DbSession, user: CurrentUser) -> list[Company]:
     if user.role == Role.ADMIN:
         return list(db.scalars(select(Company).order_by(Company.code)).all())
 
-    return [grant.company for grant in user.companies]
+    return list(user.companies)
 
 
 @router.get("/current", response_model=CompanyRead)

@@ -25,7 +25,7 @@ seed: ## Load demo companies, users and activity
 
 dev: ## Run backend and frontend together (Ctrl-C stops both)
 	@echo "Backend  -> http://localhost:8000/docs"
-	@echo "Frontend -> http://localhost:3000"
+	@echo "Frontend -> http://localhost:3000 (3001 when 3000 is busy)"
 	@trap 'kill 0' INT TERM; \
 		(cd backend && .venv/bin/uvicorn app.main:app --reload --port 8000) & \
 		($(NPM) run dev --prefix frontend) & \

@@ -3,6 +3,16 @@ const auth = useAuthStore()
 const { t } = useI18n()
 const route = useRoute()
 
+const sidebarOpen = useCookie<boolean>('erp_sidebar_open', {
+  default: () => true,
+  sameSite: 'lax',
+  maxAge: 60 * 60 * 24 * 365,
+})
+
+function toggleSidebar() {
+  sidebarOpen.value = !sidebarOpen.value
+}
+
 const companyName = computed(() => {
   const code = auth.activeCompany
   return auth.companies.find((c) => c.code === code)?.name ?? code ?? ''
@@ -18,16 +28,18 @@ const routeLabel = computed(() => {
   if (path === '/') return 'dashboard'
   return path.split('/')[1] ?? 'dashboard'
 })
-
-async function signOut() {
-  auth.clear()
-  await navigateTo('/login')
-}
 </script>
 
 <template>
-  <div class="grid min-h-screen grid-cols-1 lg:grid-cols-[248px_minmax(0,1fr)]">
-    <aside class="flex flex-col gap-4 border-b border-sunken bg-panel p-4 lg:border-b-0 lg:border-r">
+  <div
+    class="grid min-h-screen grid-cols-1"
+    :class="sidebarOpen ? 'lg:grid-cols-[248px_minmax(0,1fr)]' : ''"
+  >
+    <aside
+      v-show="sidebarOpen"
+      id="app-sidebar"
+      class="flex flex-col gap-4 border-b border-sunken bg-panel p-4 lg:border-b-0 lg:border-r"
+    >
       <div class="flex items-center gap-2.5 px-1">
         <span
           class="text-bg-primary grid size-9 place-items-center rounded-lg text-sm"
@@ -60,26 +72,32 @@ async function signOut() {
           <LanguageSwitcher />
           <ThemeSwitcher />
         </div>
-
-        <div>
-          <p class="text-sm font-medium">{{ auth.user?.full_name }}</p>
-          <p class="text-xs text-ink/60">{{ auth.user ? t(`role.${auth.user.role}`) : '' }}</p>
-        </div>
-
-        <button class="btn btn-sm btn-text justify-start" type="button" @click="signOut">
-          {{ t('nav.signOut') }}
-        </button>
       </div>
     </aside>
 
     <main class="flex min-w-0 flex-col">
       <header
-        class="flex items-center justify-between gap-4 border-b border-sunken bg-panel px-4 py-3 lg:px-6"
+        class="flex items-center justify-between gap-4 border-b border-sunken bg-panel px-4 py-2.5 lg:px-6"
       >
-        <h1 class="text-xl font-semibold">{{ t(`nav.${routeLabel}`) }}</h1>
-        <div class="flex items-center gap-3 text-sm">
-          <span class="text-ink/60">{{ companyName }}</span>
+        <div class="flex min-w-0 items-center gap-2">
+          <button
+            id="sidebar-toggle"
+            class="btn btn-sm btn-square btn-text"
+            type="button"
+            :aria-expanded="sidebarOpen"
+            aria-controls="app-sidebar"
+            :aria-label="sidebarOpen ? t('nav.hideSidebar') : t('nav.showSidebar')"
+            @click="toggleSidebar"
+          >
+            <span aria-hidden="true">☰</span>
+          </button>
+          <h1 class="truncate text-xl font-semibold">{{ t(`nav.${routeLabel}`) }}</h1>
+        </div>
+        <div class="flex items-center gap-2 text-sm">
+          <span class="hidden text-ink/60 sm:inline">{{ companyName }}</span>
           <span class="badge badge-soft font-mono text-xs">{{ currency }}</span>
+          <ThemeToggle />
+          <UserMenu />
         </div>
       </header>
 

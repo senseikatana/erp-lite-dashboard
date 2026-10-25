@@ -48,7 +48,14 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
 
     # --- CORS ---
-    cors_origins: list[str] = ["http://localhost:3000"]
+    # The Nuxt dev server falls back to 3001 when 3000 is already taken, so
+    # both local ports are allowed out of the box.
+    cors_origins: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+    ]
 
     # --- Multi-tenancy ---
     default_company: str = "DEMO_SL"

@@ -27,7 +27,15 @@
     "demand": "Demand worksheet",
     "routes": "Routes & transport",
     "activity": "Activity log",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "hideSidebar": "Hide sidebar",
+    "showSidebar": "Show sidebar"
+  },
+  "user": {
+    "menu": "User menu",
+    "themeToggle": "Toggle theme",
+    "purge": "Purge company data",
+    "purgeConfirm": "Delete every order, item, route and activity event for {company}? This cannot be undone."
   },
   "login": {
     "title": "Sign in",
